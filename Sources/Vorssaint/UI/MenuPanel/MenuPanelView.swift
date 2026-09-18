@@ -1840,7 +1840,9 @@ struct QuickControlsSection: View {
     }
 
     private var keyDebounceWindowControl: some View {
-        Stepper(value: keyDebounceWindowBinding, in: Defaults.allowedKeyboardDebounceWindowRange, step: 5) {
+        Stepper(value: keyDebounceWindowBinding,
+                in: Defaults.allowedKeyboardDebounceWindowRange,
+                step: Defaults.keyboardDebounceWindowStep) {
             HStack(spacing: 6) {
                 Text(l10n.s.keyDebounceGlobalWindow)
                     .font(.system(size: 10.5, weight: .medium))
@@ -1977,11 +1979,16 @@ struct UtilityActionButton: View {
                 VStack(alignment: .leading, spacing: 7) {
                     if permissionAction != nil {
                         rowContent(showChevron: false)
-                        permissionButton
                     } else {
                         mainButton
                     }
-                    accessoryButton
+                    VStack(alignment: .leading, spacing: 7) {
+                        if permissionAction != nil {
+                            permissionButton
+                        }
+                        accessoryButton
+                    }
+                    .padding(.leading, 31)
                 }
                 .panelCard()
             } else {
@@ -2011,7 +2018,6 @@ struct UtilityActionButton: View {
             }
             .buttonStyle(.bordered)
             .controlSize(.mini)
-            .padding(.leading, 31)
         }
     }
 

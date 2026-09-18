@@ -1001,6 +1001,10 @@ struct MediaWorkspaceView: View {
                     compressionButton(level, value: value)
                 }
             }
+            Text(compressionDescription(for: MediaCompressionLevel.nearest(to: value.wrappedValue)))
+                .font(.system(size: compact ? 9.5 : 10.5))
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 
@@ -1263,6 +1267,14 @@ struct MediaWorkspaceView: View {
         }
     }
 
+    private func compressionDescription(for level: MediaCompressionLevel) -> String {
+        switch level {
+        case .low: return l10n.s.mediaCompressionLowDescription
+        case .medium: return l10n.s.mediaCompressionMediumDescription
+        case .high: return l10n.s.mediaCompressionHighDescription
+        }
+    }
+
     private func compressionTitle(for level: MediaCompressionLevel) -> String {
         switch level {
         case .low: return l10n.s.mediaCompressionLow
@@ -1326,6 +1338,20 @@ struct MediaWorkspaceView: View {
                                       completion: @escaping (NSApplication.ModalResponse) -> Void) {
         guard !panelModalActive else { return }
         panelModalActive = true
+        if let island = NotchService.shared.presentationWindow, island.isVisible,
+           NSApp.currentEvent?.window === island || NSApp.keyWindow === island {
+            // The island floats above the modal panel level, so an
+            // application-modal dialog would open behind it. A sheet shares
+            // the island's level and keeps its working surface open.
+            panel.beginSheetModal(for: island) { response in
+                panelModalActive = false
+                // Dismissal restores the previous key window after this callback.
+                DispatchQueue.main.async { if NotchService.shared.expanded { island.makeKey() } }
+                completion(response)
+            }
+            NSApp.activate(ignoringOtherApps: true)
+            return
+        }
         NSApp.activate(ignoringOtherApps: true)
         DispatchQueue.main.async {
             let response = panel.runModal()
