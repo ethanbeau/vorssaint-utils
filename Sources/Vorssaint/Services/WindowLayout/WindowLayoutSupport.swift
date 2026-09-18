@@ -309,9 +309,10 @@ enum WindowLayoutGeometry {
         }
     }
 
-    /// The display in one physical direction. Only a display starting further
-    /// along that axis counts; the nearest one wins, then the closest center
-    /// on the other axis breaks ties. Next and previous display keep their own
+    /// The display in one physical direction. Sideways, only a display starting
+    /// further along that axis counts. Vertically, it must lie fully beyond the
+    /// current display edge. The nearest one wins, then the closest center on
+    /// the other axis breaks ties. Next and previous display keep their own
     /// order, which cycles through every screen.
     static func neighbourIndex(currentIndex: Int,
                                frames: [CGRect],
@@ -323,8 +324,8 @@ enum WindowLayoutGeometry {
                 switch direction {
                 case .left: frames[$0].minX < current.minX
                 case .right: frames[$0].minX > current.minX
-                case .up: frames[$0].minY > current.minY
-                case .down: frames[$0].minY < current.minY
+                case .up: frames[$0].minY >= current.maxY
+                case .down: frames[$0].maxY <= current.minY
                 }
             }
             .min { lhs, rhs in

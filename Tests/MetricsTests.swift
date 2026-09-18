@@ -6667,6 +6667,20 @@ struct MetricsTests {
                                                         frames: verticalNeighbours,
                                                         direction: .down) == nil,
                "window layout stops at the topmost and bottommost displays")
+        let overlappingVerticalDisplays = [
+            CGRect(x: 0, y: 0, width: 1440, height: 900),
+            CGRect(x: 0, y: 800, width: 1440, height: 900),
+            CGRect(x: 0, y: 900, width: 1440, height: 900),
+            CGRect(x: 0, y: -900, width: 1440, height: 900),
+            CGRect(x: 0, y: -800, width: 1440, height: 900),
+        ]
+        expect(WindowLayoutGeometry.neighbourIndex(currentIndex: 0,
+                                                    frames: overlappingVerticalDisplays,
+                                                    direction: .up) == 2
+                && WindowLayoutGeometry.neighbourIndex(currentIndex: 0,
+                                                        frames: overlappingVerticalDisplays,
+                                                        direction: .down) == 3,
+               "window layout ignores vertically overlapping displays when crossing")
         let mixedDisplays = [
             CGRect(x: 0, y: 0, width: 1440, height: 900),
             CGRect(x: 1440, y: 0, width: 1440, height: 900),
