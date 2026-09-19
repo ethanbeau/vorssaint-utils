@@ -166,6 +166,8 @@ struct Strings {
     let keepAwakeEndsIn: String        // + remaining
     let keepAwakeUntilDisabled: String
     let keepAwakeNormalRules: String
+    let keepAwakeUntilLabel: String
+    let keepAwakeUntilStart: String
     let keepAwakeOptions: String
     let keepAwakeMouseJiggle: String
     let keepAwakeMouseJiggleCaption: String
@@ -337,7 +339,6 @@ struct Strings {
     let switcherNoWindows: String
     let switcherIconRowMode: String
     let switcherIconRowModeCaption: String
-    let switcherSimpleMode: String
     let switcherSimpleModeCaption: String
     let switcherShortcutHintApps: String
     let switcherShortcutHintWindows: String
@@ -365,6 +366,8 @@ struct Strings {
     let dockPreviewOpenDelayCaption: String
     let dockPreviewQuitAppOnClose: String
     let dockPreviewQuitAppOnCloseCaption: String
+    let dockPreviewKeepDockVisible: String
+    let dockPreviewKeepDockVisibleCaption: String
     let dockPreviewOrderByCreation: String
     let dockPreviewOrderByCreationCaption: String
     let dockClickMinimize: String
@@ -954,7 +957,6 @@ struct Strings {
     let monitorItemDiskProtection: String
     let monitorItemDiskTools: String
     let monitorPanelConfigHint: String
-    let monitorOrderSection: String
     let monitorOrderHint: String
     let obStepPanelTitle: String
     let obStepPanelBody: String
@@ -1028,7 +1030,6 @@ struct Strings {
     let updateShowcaseUnavailable: String
     let updateShowcaseRestart: String
     let showMenuBarIcon: String
-    let showMenuBarIconCaption: String
     let menuBarIconStillHiddenTitle: String
     let menuBarIconStillHiddenBody: String
     let menuBarIconManagerHintFormat: String  // + manager name (twice)
@@ -1247,6 +1248,8 @@ extension Strings {
         keepAwakeEndsIn: "Termina em",
         keepAwakeUntilDisabled: "Ativo até você desativar",
         keepAwakeNormalRules: "O Mac segue as regras normais de energia",
+        keepAwakeUntilLabel: "Até",
+        keepAwakeUntilStart: "Iniciar",
         keepAwakeOptions: "Opções",
         keepAwakeMouseJiggle: "Mover cursor levemente",
         keepAwakeMouseJiggleCaption: "Durante uma sessão, move o cursor um pouco no intervalo escolhido.",
@@ -1407,7 +1410,6 @@ extension Strings {
         switcherNoWindows: "Nenhuma janela aberta",
         switcherIconRowMode: "Mostrar %@ com ícones grandes",
         switcherIconRowModeCaption: "Mostra um ícone por app com os previews das janelas do app acima.",
-        switcherSimpleMode: "Alternador simples",
         switcherSimpleModeCaption: "Mostra ícones de apps e títulos das janelas, sem previews nem captura da tela pelo alternador.",
         switcherShortcutHintApps: "Apps",
         switcherShortcutHintWindows: "Janelas",
@@ -1435,6 +1437,8 @@ extension Strings {
         dockPreviewOpenDelayCaption: "Quanto tempo o ponteiro precisa ficar sobre um ícone antes de o painel abrir.",
         dockPreviewQuitAppOnClose: "Encerrar o app com o botão ×",
         dockPreviewQuitAppOnCloseCaption: "No Dock Preview, × encerra o app inteiro em vez de fechar apenas aquela janela.",
+        dockPreviewKeepDockVisible: "Manter Dock visível (experimental)",
+        dockPreviewKeepDockVisibleCaption: "Suspende o ocultamento automático enquanto o preview está aberto e restaura ao sair. Pode reajustar janelas. Se o app for interrompido, reabra-o para restaurar o Dock.",
         dockPreviewOrderByCreation: "Ordenar janelas por criação",
         dockPreviewOrderByCreationCaption: "Mostra primeiro as janelas mais antigas em vez das usadas mais recentemente.",
         dockClickMinimize: "Clicar no Dock minimiza",
@@ -1997,7 +2001,6 @@ extension Strings {
         monitorItemDiskProtection: "Proteção externa",
         monitorItemDiskTools: "Ferramentas",
         monitorPanelConfigHint: "Abra um bloco para escolher o que ele mostra.",
-        monitorOrderSection: "Ordem das seções",
         monitorOrderHint: "Arraste para reordenar as seções do painel e use o olho para mostrar ou ocultar cada uma.",
         obStepPanelTitle: "O que aparece no painel",
         obStepPanelBody: "Abra cada bloco e escolha exatamente o que mostrar quando você clica no ícone.",
@@ -2069,7 +2072,6 @@ extension Strings {
         updateShowcaseUnavailable: "Não foi possível carregar o vídeo agora. Você ainda pode continuar.",
         updateShowcaseRestart: "Voltar ao início",
         showMenuBarIcon: "Mostrar ícone na barra de menus",
-        showMenuBarIconCaption: "Se o ícone do Vorssaint sumir (o macOS pode esconder ícones quando a barra de menus fica sem espaço, comum em Macs com notch), reabra o Vorssaint pela pasta Aplicativos ou pelo Spotlight: isso recria o ícone e, se ele ainda estiver escondido, abre esta janela.",
         menuBarIconStillHiddenTitle: "O ícone continua escondido",
         menuBarIconStillHiddenBody: "O ícone foi recriado, mas o macOS não deu um lugar visível a ele. A barra de menus provavelmente está sem espaço: remova alguns ícones da barra (ou feche apps com menus longos) e tente de novo.",
         menuBarIconManagerHintFormat: "O %@ está aberto e pode estar guardando o ícone na seção oculta dele. Procure o Vorssaint lá, ou configure o %@ para sempre mostrar o Vorssaint.",
@@ -2283,6 +2285,8 @@ extension Strings {
         keepAwakeEndsIn: "Ends in",
         keepAwakeUntilDisabled: "Active until you turn it off",
         keepAwakeNormalRules: "The Mac follows its normal energy rules",
+        keepAwakeUntilLabel: "Until",
+        keepAwakeUntilStart: "Start",
         keepAwakeOptions: "Options",
         keepAwakeMouseJiggle: "Move pointer slightly",
         keepAwakeMouseJiggleCaption: "During a session, moves the pointer a little at the chosen interval.",
@@ -2443,7 +2447,6 @@ extension Strings {
         switcherNoWindows: "No open windows",
         switcherIconRowMode: "Show %@ with large icons",
         switcherIconRowModeCaption: "Shows one icon per app with that app’s window previews above it.",
-        switcherSimpleMode: "Simple app switcher",
         switcherSimpleModeCaption: "Shows app icons and window titles, without previews or screen capture by the switcher.",
         switcherShortcutHintApps: "Apps",
         switcherShortcutHintWindows: "Windows",
@@ -2471,6 +2474,8 @@ extension Strings {
         dockPreviewOpenDelayCaption: "How long the pointer has to rest on an icon before its panel opens.",
         dockPreviewQuitAppOnClose: "Quit the app with the × button",
         dockPreviewQuitAppOnCloseCaption: "In Dock Preview, × quits the whole app instead of closing only that window.",
+        dockPreviewKeepDockVisible: "Keep Dock visible (experimental)",
+        dockPreviewKeepDockVisibleCaption: "Pauses auto-hide while the preview is open and restores it when you leave. May resize windows. If the app is interrupted, reopen it to restore the Dock.",
         dockPreviewOrderByCreation: "Order windows by creation time",
         dockPreviewOrderByCreationCaption: "Show older windows first instead of the ones you used most recently.",
         dockClickMinimize: "Click the Dock icon to minimize",
@@ -3033,7 +3038,6 @@ extension Strings {
         monitorItemDiskProtection: "External protection",
         monitorItemDiskTools: "Tools",
         monitorPanelConfigHint: "Open a block to choose what it shows.",
-        monitorOrderSection: "Section order",
         monitorOrderHint: "Drag to reorder the panel sections and use the eye to show or hide each one.",
         obStepPanelTitle: "What’s in the panel",
         obStepPanelBody: "Open each block and pick exactly what shows when you click the icon.",
@@ -3105,7 +3109,6 @@ extension Strings {
         updateShowcaseUnavailable: "The video could not load right now. You can still continue.",
         updateShowcaseRestart: "Restart",
         showMenuBarIcon: "Show menu bar icon",
-        showMenuBarIconCaption: "If Vorssaint’s icon disappears (macOS can hide menu bar icons when the bar runs out of room, common on Macs with a notch), reopen Vorssaint from Applications or Spotlight: that rebuilds the icon and, if it’s still hidden, opens this window.",
         menuBarIconStillHiddenTitle: "The icon is still hidden",
         menuBarIconStillHiddenBody: "The icon was rebuilt, but macOS did not give it a visible spot. The menu bar is probably out of room: remove some menu bar icons (or close apps with long menus) and try again.",
         menuBarIconManagerHintFormat: "%@ is open and may be keeping the icon in its hidden section. Look for Vorssaint there, or set %@ to always show Vorssaint.",

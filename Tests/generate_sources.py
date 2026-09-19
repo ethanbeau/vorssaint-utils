@@ -40,6 +40,21 @@ def availability_declaration(path, prefix):
 
 def main():
     OUTPUT.mkdir(parents=True, exist_ok=True)
+    panel = "Sources/Vorssaint/App/AppDelegate.swift"
+    write("MenuPanelRecovery.swift", "import AppKit\nimport Foundation\n"
+          + "extension MenuPanelRecoveryTests {\nfinal class Host: Fixture {\n"
+          + "".join(declaration(panel, prefix).replace("private ", "") for prefix in [
+              "    private struct PanelAnchor", "    private func statusButtonMidX(",
+              "    private func correctedPopoverMidX(", "    private func resolvePanelAnchor(",
+              "    private func frameStillDescribesMenuBar(", "    private func statusFrameNeedsAnchorOverride(",
+              "    private func anchorVisibleFrame(", "    private func applyPopoverDriftFrame(",
+              "    private func beginPopoverDriftCorrection(window: NSWindow, anchor: PanelAnchor) {",
+              "    private func armPopoverDriftCorrection(", "    private func endPopoverDriftCorrection(",
+              "    private func showPopover(", "    func popoverDidClose(",
+              "    private func releasePanelResources(", "    private func anchorAfterForeignClose(",
+              "    private func reopenPanelAfterForeignClose("])
+          + "var popoverAnchor: PanelAnchor?\nvar lastGoodPanelAnchor: PanelAnchor?\n"
+          + "}\n}\n")
     brightness = "Sources/Vorssaint/Services/Display/BrightnessService.swift"
     write("DisplayRestoration.swift", "import CoreGraphics\nimport Foundation\n"
           + "extension DisplayRestorationTests {\nfinal class BrightnessService: Fixture {\n"
@@ -96,6 +111,13 @@ def main():
           + "}\nextension DockPreviewScopeTests.WindowEnumerator {\n"
           + declaration("Sources/Vorssaint/Services/Switcher/WindowEnumerator.swift",
                         "    static func dockPreviewMayActivate(")
+          + "}\n")
+    write("DockAutohideInput.swift", "import CoreGraphics\nimport Foundation\nextension DockAutohideHoldTests.Service {\n"
+          + "".join(declaration(dock, prefix).replace("private func", "func", 1)
+                    for prefix in ["    private func beginDockAutohideHold()",
+                                   "    private func releaseDockAutohideHold()",
+                                   "    private func handleDockHoldInput(type:",
+                                   "    private func handle(type:"])
           + "}\n")
     # Entire input/mute services retain their production control flow. Only
     # visibility, scheduling, defaults and HAL transport are replaced by fixtures.
@@ -225,9 +247,15 @@ def main():
           + "}\n")
     canvas = "Sources/Vorssaint/Services/Notch/NotchWindowHost.swift"
     write("NotchHover.swift", "import AppKit\nextension NotchHoverTests {\nfinal class Service: State {\n"
+          + declaration(notch, "    func show(_ incoming:").replace("NotchSupport.routes(incoming.event)", "true")
           + "".join(declaration(notch, prefix).replace("    private ", "    ", 1) for prefix in [
               "    private var hiddenUntilHover:", "    func hover(",
+              "    private var holdsNotification:", "    private func holdNotification(",
+              "    private func syncNoticeWithPreferences(",
+              "    private func releaseNotification(", "    private func scheduleNoticeDismissal(",
+              "    private func dismissNotice(", "    private var noticeCanPresent:",
               "    private func syncHiddenHoverMonitoring(", "    private func removeHiddenHoverMonitors("])
+          .replace("NotchSupport.routes(notice.event)", "routesNotices")
           + "}\n}\n")
     music_visibility = "".join(declaration(notch, prefix).replace("    private ", "    ", 1) for prefix in [
         "    private var hiddenUntilHover:", "    var idleContent:", "    var hasMusicActivity:", "    var compactActivity:",
@@ -296,6 +324,7 @@ def main():
               .replace("NotchSupport.modules()", "NotchSupport.modules(in: ReviewDefaults.current)")
           + declaration(notch, "    func open(_ module:")
               .replace("NotchSupport.isEnabled()", "NotchSupport.isEnabled(in: ReviewDefaults.current)")
+          + declaration(notch, "    var reopeningModule:")
               .replace("UserDefaults.standard", "ReviewDefaults.current!")
           + declaration(notch, "    private func updateSession(").replace("private func", "func", 1)
               .replace("AppFeature.mixer.isAvailable", "AppFeature.mixer.isAvailable(in: ReviewDefaults.current)")
@@ -372,10 +401,10 @@ def main():
           + "var iconRowContentWidth: CGFloat { switcher.iconRowLayout.contentWidth(simpleMode: true, windowRow: false) }\n"
           + "var body: some View {\nif selectedWindow != nil {\nlet appWindows = selectedAppWindows\n"
           + "if switcher.simple {\nGroup {\n"
-          + declaration(switcher, "                ScrollViewReader { proxy in")
+           + declaration(switcher, "                ScrollViewReader { proxy in")
           + "}\n.frame(width: iconRowContentWidth - 2 * SwitcherIconRowLayout.simpleTitlePanelPadding, "
           + "height: 25 * SwitcherIconRowLayout.scale)\n} else {\n"
-          + declaration(switcher, "                    ScrollViewReader { proxy in")
+           + declaration(switcher, "                    ScrollViewReader { proxy in")
           + "}\n}\n}\n"
           + declaration(switcher, "    private var selectedWindow:")
           + declaration(switcher, "    private var selectedAppWindows:")
@@ -561,12 +590,12 @@ def main():
           + "var enabled: Set<KeepAwakeAutomationCondition> = []\n"
           + "var matching: Set<KeepAwakeAutomationCondition> = []\n"
           + "var requireAll = false\nvar batteryAllows = true\n"
-          + "var activations: [(minutes: Int, trigger: SessionTrigger)] = []\n"
+          + "var activations: [(end: Date?, trigger: SessionTrigger)] = []\n"
           + "func automaticSessionAllowedByBatteryProtection() -> Bool { batteryAllows }\n"
           + "func currentMatchingAutomationConditions() -> Set<KeepAwakeAutomationCondition> { matching }\n"
           + "func currentEnabledAutomationConditions() -> Set<KeepAwakeAutomationCondition> { enabled }\n"
           + "func automationRequiresAllConditions() -> Bool { requireAll }\n"
-          + "func activate(minutes: Int, trigger: SessionTrigger) { activations.append((minutes, trigger)) }\n"
+          + "func activate(end: Date?, trigger: SessionTrigger) { activations.append((end, trigger)) }\n"
           + declaration(keep_awake, "    private func continueAutomaticallyAfterTimerIfNeeded()")
             .replace("private func", "func", 1)
           + "}\n}\n")
