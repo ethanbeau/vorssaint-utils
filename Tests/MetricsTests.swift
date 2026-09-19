@@ -6853,6 +6853,15 @@ struct MetricsTests {
                                                     frames: unequalDownwardDisplays,
                                                     direction: .down) == 1,
                "window layout ranks downward displays by their top edge, not their far edge")
+        let unequalUpwardDisplays = [
+            CGRect(x: 0, y: 0, width: 1440, height: 900),
+            CGRect(x: 0, y: 900, width: 1440, height: 1200),
+            CGRect(x: 1700, y: 950, width: 800, height: 800),
+        ]
+        expect(WindowLayoutGeometry.neighbourIndex(currentIndex: 0,
+                                                    frames: unequalUpwardDisplays,
+                                                    direction: .up) == 1,
+               "window layout ranks upward displays by their bottom edge, not their far edge")
         let tiedDownwardDisplays = [
             CGRect(x: 0, y: 0, width: 1440, height: 900),
             CGRect(x: 600, y: -900, width: 800, height: 900),
@@ -6862,6 +6871,46 @@ struct MetricsTests {
                                                     frames: tiedDownwardDisplays,
                                                     direction: .down) == 1,
                "window layout uses horizontal center distance to break equal downward-edge ties")
+        let equallyCenteredDownwardDisplays = [
+            CGRect(x: 0, y: 0, width: 1440, height: 900),
+            CGRect(x: 1440, y: -900, width: 720, height: 900),
+            CGRect(x: -720, y: -900, width: 720, height: 900),
+        ]
+        expect(WindowLayoutGeometry.neighbourIndex(currentIndex: 0,
+                                                    frames: equallyCenteredDownwardDisplays,
+                                                    direction: .down) == 1,
+               "window layout keeps input order for exact downward center ties")
+        let partiallyAlignedDownwardDisplays = [
+            CGRect(x: 0, y: 0, width: 1440, height: 900),
+            CGRect(x: 1200, y: -900, width: 800, height: 900),
+            CGRect(x: -2000, y: -900, width: 800, height: 900),
+        ]
+        expect(WindowLayoutGeometry.neighbourIndex(currentIndex: 0,
+                                                    frames: partiallyAlignedDownwardDisplays,
+                                                    direction: .down) == 1,
+               "window layout allows partially aligned downward displays and prefers their nearer center")
+        let touchingDownwardDisplays = [
+            CGRect(x: 0, y: 0, width: 1440, height: 900),
+            CGRect(x: 0, y: -900, width: 1440, height: 900),
+        ]
+        let fractionallySeparatedDownwardDisplays = [
+            CGRect(x: 0, y: 0, width: 1440, height: 900),
+            CGRect(x: 0, y: -900.25, width: 1440, height: 900),
+        ]
+        let fractionallyOverlappingDownwardDisplays = [
+            CGRect(x: 0, y: 0, width: 1440, height: 900),
+            CGRect(x: 0, y: -899.999, width: 1440, height: 900),
+        ]
+        expect(WindowLayoutGeometry.neighbourIndex(currentIndex: 0,
+                                                    frames: touchingDownwardDisplays,
+                                                    direction: .down) == 1
+                && WindowLayoutGeometry.neighbourIndex(currentIndex: 0,
+                                                        frames: fractionallySeparatedDownwardDisplays,
+                                                        direction: .down) == 1
+                && WindowLayoutGeometry.neighbourIndex(currentIndex: 0,
+                                                        frames: fractionallyOverlappingDownwardDisplays,
+                                                        direction: .down) == nil,
+               "window layout accepts touching or fractionally separated displays but rejects any overlap")
         let overlappingVerticalDisplays = [
             CGRect(x: 0, y: 0, width: 1440, height: 900),
             CGRect(x: 0, y: 800, width: 1440, height: 900),
@@ -7027,6 +7076,31 @@ struct MetricsTests {
                "window layout only crosses displays when the same half is used twice in a row")
         expect(WindowLayoutGeometry.displayCrossing(for: .leftThird, previousAction: .leftThird) == nil,
                "window layout keeps thirds on their own display")
+        let repeatedBottomHalfDisplays = [
+            CGRect(x: 0, y: 0, width: 1440, height: 900),
+            CGRect(x: 0, y: -1200, width: 1440, height: 1200),
+            CGRect(x: 1700, y: -950, width: 800, height: 800),
+        ]
+        let firstBottomHalf = WindowLayoutGeometry.rect(for: .bottomHalf,
+                                                         current: currentWindow,
+                                                         visibleFrame: repeatedBottomHalfDisplays[0])
+        let repeatedBottomHalf = WindowLayoutGeometry.displayCrossing(for: .bottomHalf,
+                                                                        previousAction: .bottomHalf)
+        let repeatedBottomHalfDestination = repeatedBottomHalf.flatMap {
+            WindowLayoutGeometry.neighbourIndex(currentIndex: 0,
+                                                frames: repeatedBottomHalfDisplays,
+                                                direction: $0.direction)
+        }
+        let secondBottomHalf = repeatedBottomHalfDestination.flatMap { destination in
+            repeatedBottomHalf.map {
+                WindowLayoutGeometry.rect(for: $0.action,
+                                          current: firstBottomHalf,
+                                          visibleFrame: repeatedBottomHalfDisplays[destination])
+            }
+        }
+        expect(repeatedBottomHalfDestination == 1
+                && secondBottomHalf == CGRect(x: 0, y: -600, width: 1440, height: 600),
+               "window layout moves a repeated bottom half to the top half of the nearest display below")
         let leftTarget = WindowLayoutGeometry.rect(for: .leftHalf,
                                                    current: currentWindow,
                                                    visibleFrame: visibleFrame)
