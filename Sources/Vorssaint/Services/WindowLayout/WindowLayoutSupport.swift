@@ -345,9 +345,17 @@ enum WindowLayoutGeometry {
                     rhsPosition = rhsFrame.minX
                     lhsCenterDistance = abs(lhsFrame.midY - current.midY)
                     rhsCenterDistance = abs(rhsFrame.midY - current.midY)
-                case .up, .down:
+                case .up:
                     lhsPosition = lhsFrame.minY
                     rhsPosition = rhsFrame.minY
+                    lhsCenterDistance = abs(lhsFrame.midX - current.midX)
+                    rhsCenterDistance = abs(rhsFrame.midX - current.midX)
+                case .down:
+                    // minY is the far edge when moving down. Rank by the
+                    // candidate's facing (top) edge, so a taller display
+                    // directly below beats a shorter, offset one.
+                    lhsPosition = lhsFrame.maxY
+                    rhsPosition = rhsFrame.maxY
                     lhsCenterDistance = abs(lhsFrame.midX - current.midX)
                     rhsCenterDistance = abs(rhsFrame.midX - current.midX)
                 }

@@ -6844,6 +6844,24 @@ struct MetricsTests {
                                                         frames: verticalNeighbours,
                                                         direction: .down) == nil,
                "window layout stops at the topmost and bottommost displays")
+        let unequalDownwardDisplays = [
+            CGRect(x: 0, y: 0, width: 1440, height: 900),
+            CGRect(x: 0, y: -1200, width: 1440, height: 1200),
+            CGRect(x: 1700, y: -950, width: 800, height: 800),
+        ]
+        expect(WindowLayoutGeometry.neighbourIndex(currentIndex: 0,
+                                                    frames: unequalDownwardDisplays,
+                                                    direction: .down) == 1,
+               "window layout ranks downward displays by their top edge, not their far edge")
+        let tiedDownwardDisplays = [
+            CGRect(x: 0, y: 0, width: 1440, height: 900),
+            CGRect(x: 600, y: -900, width: 800, height: 900),
+            CGRect(x: -1000, y: -900, width: 800, height: 900),
+        ]
+        expect(WindowLayoutGeometry.neighbourIndex(currentIndex: 0,
+                                                    frames: tiedDownwardDisplays,
+                                                    direction: .down) == 1,
+               "window layout uses horizontal center distance to break equal downward-edge ties")
         let overlappingVerticalDisplays = [
             CGRect(x: 0, y: 0, width: 1440, height: 900),
             CGRect(x: 0, y: 800, width: 1440, height: 900),
