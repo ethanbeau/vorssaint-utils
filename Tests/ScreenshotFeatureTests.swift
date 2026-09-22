@@ -119,6 +119,19 @@ enum ScreenshotFeatureTests {
             protectedWindowIDs: protectedScreenshotWindows
         ), "screenshot cannot pick its own protected capture UI")
 
+        let stackedOwners: [(CGWindowID, String)] = [(80, "borders"), (81, "Terminal")]
+        let pickableIDs = stackedOwners.filter { id, owner in
+            ScreenshotCapturePolicy.canPickWindow(id, isOwnWindow: false,
+                hideVorssaintWindows: true, protectedWindowIDs: [], ownerName: owner)
+        }.map(\.0)
+        suite.expect(pickableIDs == [81],
+               "JankyBorders overlays are skipped so clicking a decorated window captures its content")
+        for owner in ["JankyBorders", "BORDERS"] {
+            suite.expect(!ScreenshotCapturePolicy.canPickWindow(80, isOwnWindow: false,
+                hideVorssaintWindows: false, protectedWindowIDs: [], ownerName: owner),
+                "border overlays stay unpickable regardless of the own-window visibility preference")
+        }
+
         // A sheet or dialog the app stacked on the clicked window is a window
         // of its own, so a single-window capture leaves it out of a shot it is
         // plainly part of (issue #1098). Same app, in front, and lying wholly
@@ -2516,8 +2529,10 @@ enum ScreenshotFeatureTests {
         // Muting every microphone, not just the one the Mac is set to: an app
         // pointed at a device of its own has to go silent too.
         suite.expect(MicMuteSupport.isOwnDevice(name: "Vorssaint Mixer")
+                && MicMuteSupport.isOwnDevice(name: "Vorssaint Island Levels")
+                && MicMuteSupport.isOwnDevice(name: "Vorssaint Recorder")
                 && !MicMuteSupport.isOwnDevice(name: "MacBook Air Microphone"),
-               "the mute skips the app's own mixing device and no other")
+               "the mute skips the app's own aggregate devices and no other")
         suite.expect(!MicMuteSupport.shouldSaveVolume(nil)
                 && !MicMuteSupport.shouldSaveVolume(0)
                 && !MicMuteSupport.shouldSaveVolume(0.005)

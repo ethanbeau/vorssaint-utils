@@ -58,6 +58,8 @@ enum NotchScreenRefreshContract {
         func resignKey() { resignations += 1 }
     }
     class State {
+        var hiddenInFullscreen = false
+        func fullscreenEnvironmentDidChange() {}
         var running = true
         var suspended = false
         var expanded = false
@@ -66,6 +68,7 @@ enum NotchScreenRefreshContract {
         var idleContent = NotchIdleContent.music
         var compactActivity: Bool?
         var accessibilityGranted = true
+        var coversMenus = false
         var menuSpaceTimer: Timer?
         var menuSpaceGeneration = 0
         var screenRefreshWork: DispatchWorkItem?
@@ -77,10 +80,15 @@ enum NotchScreenRefreshContract {
         var keepsWorkingSurface = false
         var preferenceSyncs = 0
         var reads = 0
+        var appliedRooms: [CGFloat?] = []
         var presentations = 0
         var collapses = 0
         func syncWithPreferences() { preferenceSyncs += 1 }
         func readMenuSpace() { reads += 1 }
+        func applyMenuSpace(_ room: CGFloat?) {
+            appliedRooms.append(room)
+            geometry.compactSideRoom = room
+        }
         func refreshPresentation(animated: Bool) { presentations += 1 }
         func collapse() { collapses += 1 }
     }
@@ -128,6 +136,17 @@ enum NotchScreenRefreshContract {
         service.screenParametersDidChange()
         suite.expect(service.preferenceSyncs == 2 && DispatchQueue.main.pending == 0,
                "stopping the island makes queued and later screen notifications inert")
+
+        let fullscreen = Service()
+        fullscreen.syncMenuSpaceMonitoring()
+        let fullscreenTimer = fullscreen.menuSpaceTimer
+        fullscreen.hiddenInFullscreen = true
+        fullscreen.syncMenuSpaceMonitoring()
+        suite.expect(fullscreen.menuSpaceTimer == nil && fullscreenTimer?.invalidated == true,
+                     "fullscreen hiding stops menu polling")
+        fullscreen.hiddenInFullscreen = false
+        fullscreen.syncMenuSpaceMonitoring()
+        suite.expect(fullscreen.menuSpaceTimer != nil, "leaving fullscreen restores menu monitoring")
 
         let virtual = Service()
         virtual.geometry.compactSideRoom = nil
@@ -214,6 +233,31 @@ enum NotchScreenRefreshContract {
         simulated.applicationDidActivate()
         suite.expect(simulated.reads == beforeReads + 3, "a suspended island ignores activations")
         simulated.suspended = false
+
+        let covering = Service()
+        covering.geometry.compactSideRoom = nil
+        covering.accessibilityGranted = false
+        covering.coversMenus = true
+        covering.syncMenuSpaceMonitoring()
+        let emptyBar = NotchMenuBarLayout.sideRoom(screen: covering.geometry.screen, cameraWidth: covering.geometry.cameraWidth,
+                                                   barHeight: covering.geometry.menuBarHeight, occupied: [])
+        suite.expect(covering.menuSpaceTimer == nil && covering.reads == 0 && covering.appliedRooms == [emptyBar]
+               && covering.geometry.compactTimerGeometry(showsDownloads: false).compactActivityWingWidth > 0,
+               "an island allowed to cover the menus keeps an empty bar's room, so its timer has wings, "
+               + "without Accessibility or a menu reader")
+        covering.accessibilityGranted = true
+        covering.syncMenuSpaceMonitoring()
+        suite.expect(covering.menuSpaceTimer == nil && covering.reads == 0 && covering.geometry.compactSideRoom == emptyBar,
+               "granting Accessibility starts no reader for menus the island may cover")
+        covering.running = false
+        let applied = covering.appliedRooms.count
+        covering.syncMenuSpaceMonitoring()
+        suite.expect(covering.appliedRooms.count == applied, "a stopped island applies no room")
+        covering.running = true
+        covering.coversMenus = false
+        covering.syncMenuSpaceMonitoring()
+        suite.expect(covering.menuSpaceTimer != nil && covering.reads == 1,
+               "giving way to the menus again resumes the existing reader")
 
         let physical = Service()
         physical.idleContent = .none

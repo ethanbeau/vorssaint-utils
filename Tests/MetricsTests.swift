@@ -29,13 +29,22 @@ struct MetricsTests {
                 MixerFeatureTests.run(suite)
             }),
             ("shelf", { ShelfFeatureTests.run(suite) }),
-            ("updates", { UpdateFeatureTests.run(suite) }),
+            ("updates", {
+                UpdateFeatureTests.run(suite)
+                PostUpdateStatusItemRecoveryTests.run(suite)
+            }),
             ("repository", { RepositoryFeatureTests.run(suite) }),
             ("screenshots", {
+                ScreenshotPreviewHoverTests.run(suite)
                 ScreenshotWatermarkTests.run(suite)
                 ScreenshotFeatureTests.run(suite)
             }),
-            ("recorder", { RecorderFeatureTests.run(suite) }),
+            ("recorder", {
+                RecorderFeatureTests.run(suite)
+                RecorderZoomAimingTests.run(suite)
+                RecorderExportSpeedTests.run(suite)
+                RecorderExportRenderingTests.run(suite)
+            }),
             ("command-bar", { CommandBarFeatureTests.run(suite) }),
             ("notch", {
                 NotchTests.run(suite)
@@ -44,7 +53,10 @@ struct MetricsTests {
             }),
             ("switcher-model", { SwitcherModelFeatureTests.run(suite) }),
             ("features", { FeatureCatalogTests.run(suite) }),
-            ("utilities", { UtilitiesFeatureTests.run(suite) }),
+            ("utilities", {
+                UtilitiesFeatureTests.run(suite)
+                PortManagerRefreshTests.run(suite)
+            }),
             ("settings", {
                 SettingsFeatureTests.run(suite)
                 SettingsWindowTests.run { suite.expect($0, $1) }
@@ -63,6 +75,7 @@ struct MetricsTests {
                 StorageFeatureTests.run(suite)
                 ScratchpadStoreContractTests.run(suite)
             }),
+            ("quit-protection", { QuitProtectionHUD.progressChecks(suite) }),
             ("recording", {
                 RecorderSampleTimingTests.run(suite)
                 RecorderWriterTests.run(suite)
@@ -71,6 +84,7 @@ struct MetricsTests {
             ("network", {
                 NetworkFeatureTests.run(suite)
                 SpeedTestTests.run(suite)
+                NetworkAddressTests.run { suite.expect($0, $1) }
             }),
             ("app-updates", { AppUpdatesContract.run(suite) }),
             ("localization", {
@@ -80,13 +94,17 @@ struct MetricsTests {
             ("cleaner", { CleanerEligibilityTests.run(suite) }),
             ("uninstaller", { UninstallerFlowTests.run(suite) }),
             ("launcher", { QuickLauncherContract.run(suite) }),
-            ("dock-autohide", { DockAutohideHoldTests.run(suite) }),
+            ("dock-autohide", {
+                DockAutohideHoldTests.run(suite)
+                DockPreviewFrameRestorationTests.run(suite)
+            }),
             ("switcher", {
                 SwitcherScrollContract.run(suite)
                 SwitcherActivationTests.run(suite)
             }),
             ("keep-awake", {
                 KeepAwakeCatalogContract.run(suite)
+                KeepAwakeLidSleepTests.run { suite.expect($0, $1) }
                 KeepAwakeTimerHandoffTests.run { suite.expect($0, $1) }
             }),
             ("emoji", { CommandBarEmojiContract.run(suite) }),
